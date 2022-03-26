@@ -1,7 +1,7 @@
 from multiprocessing import context
 from django.shortcuts import render
 from category.models import Category
-from product.models import Product
+from store.models import Product
 
 def home(request):
     context = {

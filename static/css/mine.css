@@ -1,0 +1,32 @@
+/* By Me */
+
+.container .product-thumbnails{
+  padding-left: 0px;
+  display: flex;
+  flex-direction: row;
+}
+.product-thumbnails label{
+  margin: 3px;
+}
+.value-radio {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* IMAGE STYLES */
+.value-radio + img {
+  cursor: pointer;
+  height: 50px;
+  width: 50px;
+}
+
+/* CHECKED STYLES */
+.value-radio:checked + img {
+  outline: 2px solid #f00;
+}
+
+.mobile-block {
+  display: none;
+}
