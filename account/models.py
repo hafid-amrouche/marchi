@@ -1,19 +1,22 @@
+from distutils.command.upload import upload
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager 
+from PIL import Image
+import os
 
 # Create your models here.
 # this whole app is to modify the admin panel
 
 class MyAccountManager(BaseUserManager): #this class defines how users and superusers accounts are created
-  def create_user(self, first_name, last_name, username, email, password=None):
+  def create_user(self, first_name, last_name, username, email , password=None):
     # a user is an account instance with some obligations and editing
     # this method uses the "Account class" to create users
-
     if not email:
       raise ValueError('An email is required')
     
     if not username:
       raise ValueError('A username is required')
+
 
 
     user = self.model( # creating a user with 4 fields
@@ -52,8 +55,8 @@ class MyAccountManager(BaseUserManager): #this class defines how users and super
 
 
 class Account(AbstractBaseUser): #this class creates users
-  first_name = models.CharField(max_length=50)
-  last_name = models.CharField(max_length=50)
+  first_name = models.CharField(max_length=50,)
+  last_name = models.CharField(max_length=50,)
   username = models.CharField(max_length=50, unique=True)
   email = models.EmailField(max_length=100, unique=True)
   phone_number = models.CharField(max_length=50, blank=True)
@@ -82,3 +85,36 @@ class Account(AbstractBaseUser): #this class creates users
 
   def has_module_perms(self, add_label): # any account has 'addlabel' permissions
     return True
+
+
+# class ProfilePicture(models.Model):
+#   user = models.OneToOneField(Account, on_delete=models.CASCADE, related_name="picture")
+#   picture = models.ImageField(upload_to="photos/profile_pictures")
+
+#   def get_100px_image_url(self):
+#     image = Image.open(self.picture.path)
+#     path_list = self.picture.url.split('/')
+#     path=""
+#     for item in path_list:
+#       if item == "profile_pictures":
+#         item = item + "100px"
+#       path = path + "/" + item
+#     path = path[2:]
+#     return path
+  
+#   def __init__(self, *args, **kwargs):
+#     super().__init__(*args, **kwargs)
+#     if self.picture:
+#       image = Image.open(self.picture.path)
+#       h = float(image.height)
+#       w = float(image.width)
+#       r = w/h
+#       new_image = image.resize((100, int(100.0/r)))
+#       path = self.get_100px_image_url()
+#       try:
+#         new_image.save(path)
+#       except FileNotFoundError:
+#         os.mkdir("media\photos\profile_pictures100px")
+#         new_image.save(path)
+
+  

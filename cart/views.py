@@ -64,6 +64,10 @@ def add_to_cart(request, pri, pk):
 
 def cart(request):
   cart_id = request.session.get("cart_id")
+  if not cart_id:
+    cart = Cart.objects.create()
+    cart_id = cart.id
+    request.session["cart_id"] = cart_id
   cart = Cart.objects.get(pk=cart_id)
   cart_items = cart.cartitem_set.filter(is_active=True)
   total_price = 0.0

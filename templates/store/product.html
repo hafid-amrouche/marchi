@@ -60,8 +60,8 @@
                             </div>
                         </div>
                       {% else %}
-                        <select class="form-control" data-toggle="buttons" name="{{ variation.category }}" required>
-                          <option value="" disabled>{{ variation.category }}</option>
+                        <select class="form-select" aria-label="Default select example" name="{{ variation.category }}" required>
+                          <option disabled>{{ variation.category }}</option>
                           {% for value in variation.values.all %}
                             <option class="dropdown-item" value="{{ value.name|lower }}" {% if value == variation.values.all.0 %}selected{% endif %}>{{ value.name|upper }}</option>
                           {% endfor %}

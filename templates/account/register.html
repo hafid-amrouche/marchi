@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+  <!-- ========================= SECTION CONTENT ========================= -->
+  <section class="section-content padding-y">
+
+    <!-- ============================ COMPONENT REGISTER   ================================= -->
+      <div class="card mx-auto" style="max-width:520px; margin-top:40px;">
+        <article class="card-body">
+          {% include 'includes/alerts.html' %}
+          <header class="mb-4"><h4 class="card-title">Sign up</h4></header>
+          <form id="register-form" method="post" action="{% url 'register' %}">
+            <div class="form-row">
+              {% csrf_token %}
+              {% for field in form %}
+                <div class="form-group col-md-6 {% if field.errors %}error{% endif %}">
+                  {{ field.label_tag }}
+                  {{ field }}
+                  {{ field.errors }}
+                </div> <!-- form-group end.// -->
+              {% endfor %}
+            </div>  
+            <p id="message"></p>
+            <div class="form-group">
+              <button id="register-button" class="btn btn-primary btn-block" >Register</button> 
+            </div> <!-- form-group// -->   
+          </form>
+        </article><!-- card-body.// -->
+      </div> <!-- card .// -->
+      <p class="text-center mt-4">Have an account? <a href="{% url 'log-in' %}">Log In</a></p>
+      <br><br>
+    <!-- ============================ COMPONENT REGISTER  END.// ================================= -->
+    
+    
+    </section>
+    <!-- ========================= SECTION CONTENT END// ========================= -->
+{% endblock content %}
