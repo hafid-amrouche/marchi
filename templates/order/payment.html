@@ -1,0 +1,192 @@
+{% extends 'base.html' %}
+{% load static %} 
+
+{% block content %}
+  <section class="section-content padding-y bg">
+    <div class="container">
+    <!-- ============================ COMPONENT 1 ================================= -->
+      <div class="row">
+        <aside class="col-lg-8">
+          <div class="card">
+            <div class="card-header"><h5>Billing Address</h5></div>
+            <div class="card-body">
+              {% if order %}
+                <p class="card-text mb-0">{{ order.first_name|capfirst }} {{ order.last_name|capfirst }}</p>
+                <p class="card-text mb-0">{{ order.address_line_1|capfirst }} {{ order.address_line_2|capfirst }}</p>
+                <p class="card-text mb-0">{{ order.city|capfirst }}, {{ order.state|capfirst }}, {{ order.country|capfirst }}</p>
+                <p class="card-text mb-0">{{ order.zip_code}}</p>
+                <p class="card-text mb-0">{{ order.email }}</p>
+                <p class="card-text mb-0">{{ order.phone }}</p>
+                {% if order.order_note %}
+                  <b>Order Note:</b> {{ order.order_note }}
+                {% endif %}
+              {% endif %}
+            </div>
+            </div> <!-- card.// -->
+          <div class="card">
+            <div class="card-header"><h5>Payment Method</h5></div>
+            <div class="card-body"> 
+              <p class="card-text mb-0">PayPal</p>
+            </div>
+            </div> <!-- card.// -->
+          <div class="card">
+            <div class="card-header"><h5>Products Review</h5></div>
+            <div class="card-body">
+              <table class="table table-borderless table-shopping-cart">
+                <thead class="text-muted">
+                  <tr class="small text-uppercase">
+                    <th scope="col">Product</th>
+                    <th scope="col" width="120">Quantity</th>
+                    <th scope="col" width="120">Price</th>
+                  </tr>
+                </thead>
+                <tbody>
+        
+                  {% for item in cart_items %}
+                    <tr>
+                      <td>
+                        <figure class="itemside align-items-center">
+                          <div class="aside"><img src="{{ item.product.image.url }}" class="img-sm"></div>
+                          <figcaption class="info">
+                            <a href="{{ item.product.get_url }}" class="title text-dark">{{ item.product.name }}</a>
+                            {% for value  in item.value.all %}
+                              <p class="text-muted small">{{ value.variation.category|capfirst }}: {{ value.name|capfirst }}</p>
+                            {% endfor %}
+                          </figcaption>
+                        </figure>
+                      </td>
+                      <td> 
+                        <!-- col.// -->
+                        <div class="col"> 
+                          <div class="input-group input-spinner">
+                            <input type="text" class="form-control"  value="{{ item.quantity }}">
+                          </div> <!-- input-group.// -->
+                        </div> <!-- col.// -->
+                      </td>
+                      <td> 
+                        <div class="price-wrap"> 
+                          <var class="price">$ {{ item.total }}</var> 
+                          <small class="text-muted">$ {{ item.item_price }} each</small> 
+                        </div> <!-- price-wrap .// -->
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            </div> <!-- card.// -->
+          
+        </aside> <!-- col.// -->
+        <aside class="col-lg-4">
+          
+              <div class="card">
+              <div class="card-body">
+                <dl class="dlist-align">
+                  <dt>Untaxed Total:</dt>
+                  <dd class="text-right">$ {{ untaxed_price }}</dd>
+                </dl>
+                <dl class="dlist-align">
+                  <dt>Tax:</dt>
+                  <dd class="text-right">$ {{ tax_total }} (%{% widthratio tax_per 1 100 %})</dd>
+                </dl>
+                <dl class="dlist-align">
+                  <dt>Total:</dt>
+                  <dd class="text-right text-dark b"><strong>$ {{ taxed_price }}</strong></dd>
+                </dl>
+                <hr>
+                <p class="text-center mb-3">
+                  <img src="{% static './images/misc/payments.png' %}" height="26">
+                </p>
+                <div id="paypal-button-container">
+
+                </div>
+              </div> <!-- card-body.// -->
+          </div> <!-- card.// -->
+      
+        </aside> <!-- col.// -->
+      
+      
+      </div> <!-- row.// -->
+      <!-- ============================ COMPONENT 1 END .// ================================= -->
+    </div> <!-- container .//  -->
+  </section>
+  <!-- ========================= SECTION CONTENT END// ========================= -->
+  
+  <script>
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+          const cookies = document.cookie.split(';');
+          for (let i = 0; i < cookies.length; i++) {
+              const cookie = cookies[i].trim();
+              // Does this cookie string begin with the name we want?
+              if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                  cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                  break;
+              }
+          }
+      }
+      return cookieValue;
+    }
+
+    var url = "{% url 'payment' %}";
+    var orderID = "{{ order.order_number }}";
+    var csrftoken = getCookie('csrftoken');
+    var payment_method = 'PayPal';
+    var redirect_url = '{% url "order_complete" %}';
+    paypal.Buttons({
+
+      style: {
+        color: 'blue',
+        shape: 'rect',
+        label: 'pay',
+        height: 40
+
+      },
+      // Sets up the transaction when a payment button is clicked
+      createOrder: (data, actions) => {
+        return actions.order.create({
+          purchase_units: [{
+            amount: {
+              value: '{{ taxed_price }}' // Can also reference a variable or function
+            }
+          }]
+        });
+      },
+      // Finalize the transaction  after payer approval
+      onApprove: (data, actions) => {
+        return actions.order.capture().then(function(orderData) {
+          // Successful capture! For dev/demo purposes:
+          console.log('Capture result', orderData, JSON.stringify(orderData, null, 2));
+          const transaction = orderData.purchase_units[0].payments.captures[0];
+          console.log(orderData);
+          sendData();
+          function sendData(){
+            fetch(url, {
+              method : "POST",
+              headers: {
+                "Content-type": "application/json",
+                "X-CSRFToken": csrftoken,
+              },
+              body: JSON.stringify({
+                orderID : orderID,
+                transID : orderData.id,
+                payment_method: payment_method,
+                status : orderData.status, 
+                amount : '{{ taxed_price }}',
+                email : '{{ order.email }}',
+                first_name : '{{ order.first_name }}',
+                last_name : '{{ order.last_name }}',
+              }),
+             })
+            .then(response => response.json())
+            .then(data  => {
+              window.location.href = redirect_url + '?order_number=' + data.order_number + '&payment_id=' + data.TransID;
+            });
+          }
+        });
+      }
+    }).render('#paypal-button-container');
+  </script>
+
+{% endblock content %}

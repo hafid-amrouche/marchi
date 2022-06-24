@@ -1,10 +1,6 @@
 {% extends 'base.html' %}
 {% load static %} 
 
-{% block title %}
-  Cart
-{% endblock title %}
-
 {% block content %}
   <section class="section-content padding-y bg">
     <div class="container">
@@ -56,11 +52,11 @@
                               {% for value in item.value.all %}
                                 <input type="hidden" name="{{ value.variation.category }}" value="{{ value.name }}">
                               {% endfor %}
-                              <button class="btn btn-light" id="button-minus"><i class="fa fa-minus"></i></button>
+                              <button class="btn btn-light" id="button-minus" style="border-radius:0.37rem 0px 0px 0.37rem"><i class="fa fa-minus"></i></button>
                             </form>
                             {% else %}
                               <form action="#">
-                                <button type="button" class="btn btn-light" id="button-minus">
+                                <button type="button" class="btn btn-light" id="button-minus" style="border-radius:0.37rem 0px 0px 0.37rem">
                                   <i class="fa fa-minus"></i>
                                 </button>
                               </form>
@@ -73,7 +69,7 @@
                               {% for value in item.value.all %}
                                 <input type="hidden" name="{{ value.variation.category }}" value="{{ value.name }}">
                               {% endfor %}
-                              <button class="btn btn-light" id="id="button-plus""><i class="fa fa-plus"></i></i></button>
+                              <button class="btn btn-light" id="button-plus" style="border-radius:0px 0.37rem 0.37rem 0px"><i class="fa fa-plus"></i></i></button>
                             </form>
                           </div>
                         </div> <!-- input-group.// -->
@@ -109,12 +105,12 @@
           <div class="card">
           <div class="card-body">
             <dl class="dlist-align">
-              <dt>Total price:</dt>
-              <dd class="text-right">$ {{ total_price }}</dd>
+              <dt>Untaxed Total:</dt>
+              <dd class="text-right">$ {{ untaxed_price }}</dd>
             </dl>
             <dl class="dlist-align">
               <dt>Tax:</dt>
-              <dd class="text-right">$ {{ tax }}</dd>
+              <dd class="text-right">$ {{ tax_total }} (%{% widthratio tax_per 1 100 %})</dd>
             </dl>
             <dl class="dlist-align">
               <dt>Total:</dt>
@@ -124,7 +120,7 @@
             <p class="text-center mb-3">
               <img src="{% static './images/misc/payments.png' %}" height="26">
             </p>
-            <a href="./place-order.html" class="btn btn-primary btn-block"> Checkout </a>
+            <a href="{% url 'checkout' %}" class="btn btn-primary btn-block"> Checkout </a>
             <a href="{% url 'store' %}" class="btn btn-light btn-block">Continue Shopping</a>
           </div> <!-- card-body.// -->
           </div> <!-- card.// -->

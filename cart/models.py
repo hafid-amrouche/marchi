@@ -1,20 +1,8 @@
 from django.db import models
 from store.models import Product, Value, Price
-
+from account.models import Account
+from functions import narrow
 # Create your models here.
-
-def _narrow(objects, list):
-  single_object = None
-  for object in objects :
-        if object.value.count() != len(list):
-          continue
-        else :
-          for value in object.value.all():
-            if not (value in list):
-              break
-            single_object= object
-            return single_object
-
 
 class Cart(models.Model):
   cart_id = models.CharField(max_length=2500, blank=True)
@@ -24,24 +12,28 @@ class Cart(models.Model):
     return str(self.id)
 
 class CartItem(models.Model):
+  user = models.ForeignKey(Account, on_delete=models.CASCADE, null=True, blank=True)
   product = models.ForeignKey(Product, on_delete=models.CASCADE)
-  cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
+  cart = models.ForeignKey(Cart, on_delete=models.CASCADE, null=True, blank=True)
   quantity = models.IntegerField()
   value = models.ManyToManyField(Value, blank=True)
   is_active = models.BooleanField(default=True)
-
-  def item_price(self):
-    values = []
-    for value in self.value.all():
-      values.append(value)
-    price = Price.objects.filter(product=self.product) 
-    price = _narrow(price, values)
-    price = price.total
-    
-    return price
     
   def total(self):
-    return round(float(self.quantity) * self.item_price(), 2)
+    item_price = self.price()
+    return round(float(self.quantity) * item_price, 2)
 
   def __str__(self):
     return str(self.product)
+
+  def price(self):
+    if self.product.has_variant :
+      values = []
+      for value in self.value.all():
+        values.append(value)
+      price = Price.objects.filter(product=self.product) 
+      price = narrow(price, values)
+      price = price.total
+    else :
+      price = self.product.price
+    return price

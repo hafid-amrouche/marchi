@@ -70,7 +70,10 @@
                     </div>
                   </div> <!-- row.// -->
                 {% endfor %}
-              {% endif %}   
+              {% endif %}
+              <div class="row">
+                <p>{{ product.stock }} left</p>  
+              </div   
               <hr>
               {% if product.out_of_stock == False %}
                 <form action="{% url 'add_to_cart' 'add' product.id %}" method="POST">

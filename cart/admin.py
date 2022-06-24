@@ -5,7 +5,7 @@ from .models import Cart, CartItem
 # Register your models here.
 
 class CartAdmin(admin.ModelAdmin):
-  display_list = ["id"]
+  list_display = ["id", "date_added",]
 
 
 admin.site.register(Cart, CartAdmin)

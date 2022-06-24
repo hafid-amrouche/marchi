@@ -1,23 +1,13 @@
 from django.shortcuts import render, get_object_or_404
 from django.core.paginator import PageNotAnInteger, EmptyPage, Paginator
 from django.db.models import Q
-from .models import Product, Price
+from .models import Product
 from category.models import Category
 from cart.models import Cart, CartItem
 
 # Create your views here.
 
-def _narrow(objects, list):
-  single_object = None
-  for object in objects :
-        if object.value.count() != len(list):
-          continue
-        else :
-          for value in object.value.all():
-            if not (value in list):
-              break
-            single_object= object
-            return single_object
+
 
 def _is_product_in_cart(request, product):
   cart_id = request.session.get("cart_id")

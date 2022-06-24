@@ -1,5 +1,5 @@
+
 from django.core.mail import EmailMessage
-from django.http import HttpResponse
 from django.shortcuts import redirect, render, reverse
 from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
@@ -8,40 +8,32 @@ from django.contrib import messages, auth
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.sites.shortcuts import get_current_site
+import requests
 from .forms import AccountForm
 from .models import Account
+from cart.models import CartItem, Cart
+from functions import get_cart
 from marchi.settings import EMAIL_HOST_USER
 import random
 # Create your views here.
 
 
 def accounts(request):
-  user = auth.get_user(request)
-  user_exist = False
-  try:
-    Account.objects.get(email = user)
-    user_exist = True
-  except Account.DoesNotExist:
-    pass
-  if user_exist:
+  request.user.is_authenticated = request.user.is_authenticateds(request)
+
+  if request.user.is_authenticated:
     return redirect(reverse('dashboard'))
   else:
     return redirect(reverse('home'))
 
 
 def register(request):
-  user = auth.get_user(request)
-  user_exist = False
-  try:
-    Account.objects.get(email = user)
-    user_exist = True
-  except Account.DoesNotExist:
-    pass
-  if not user_exist:
+  if not request.user.is_authenticated:
     if request.method == "GET":
       form = AccountForm()
     
     elif request.method == "POST":
+      print(request.POST)
       form = AccountForm(request.POST)
       if form.is_valid():
         first_name = form.cleaned_data["first_name"]
@@ -83,22 +75,46 @@ def register(request):
 
 
 def log_in(request):
-  user = auth.get_user(request)
-  user_exist = False
-  try:
-    Account.objects.get(email = user)
-    user_exist = True
-  except Account.DoesNotExist:
-    pass
-  if not user_exist:
+  user_exists = request.user.is_authenticated
+  if not user_exists:
     if request.method=="POST":
       email = request.POST.get("email")
       password = request.POST.get("password")
       line = ""
       user = auth.authenticate(email=email, password=password)
+
+      ## log in and adding cart items from browser to user
       if user:
+        if request.session.get("cart_id") :
+          cart_id = request.session.get("cart_id")
+          cart= get_cart(request, cart_id, Cart)
+          # checking if the cart items are included in the user items
+          for cart_item in cart.cartitem_set.all():
+            # each cart item at a time
+            cart_item_in_user_items = False
+            for user_item in user.cartitem_set.all():
+              if (cart_item.product == user_item.product) and (set(user_item.value.all()) == set(cart_item.value.all())):
+                user_item.quantity += cart_item.quantity
+                user_item.save()
+                cart_item_in_user_items = True
+                break
+            # since we are here this means cart item was not found so we create one
+            if cart_item_in_user_items == False :
+              new_user_item = CartItem.objects.create(user=user, product=cart_item.product, quantity=cart_item.quantity)
+              for value in cart_item.value.all():
+                new_user_item.value.add(value)
+                new_user_item.save()
+        # now we log in
         auth.login(request, user)
         messages.success(request, 'You are logged in.')
+        url = request.META.get('HTTP_REFERER')
+        try:
+          query = requests.utils.urlparse(url).query # gets the suffix of a url
+          params = dict(x.split("=") for x in query.split('&'))
+          if "next=" in url:
+            return redirect(params["next"])
+        except:
+          pass
         return redirect(reverse('dashboard'))
       else:
         try:
@@ -116,7 +132,10 @@ def log_in(request):
 
 @login_required(login_url = 'log-in')
 def log_out(request):
+  cart_id = request.session.get("cart_id")
   auth.logout(request)
+  if cart_id :
+    request.session["cart_id"] = cart_id
   messages.success(request, "You are logged out.")
   return redirect(reverse('log-in'))
 

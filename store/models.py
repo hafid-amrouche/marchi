@@ -3,6 +3,7 @@ from itertools import product
 from queue import Empty
 from django.db import models
 from django.shortcuts import reverse
+from pkg_resources import require
 from category.models import Category
 
 # Create your models here.
@@ -14,7 +15,6 @@ class Product(models.Model):
   off_price = models.FloatField(default=0.0)
   price = models.FloatField(default=0.0)
   has_variant = models.BooleanField(default=False)
-  stock = models.IntegerField()
   image = models.ImageField(upload_to='photos/products')
   is_available = models.BooleanField(default=True)
   category = models.ForeignKey(Category, on_delete=models.CASCADE)
@@ -25,8 +25,14 @@ class Product(models.Model):
   def get_url(self):
     return reverse('product', args=[self.category.slug, self.slug])
 
+  def stock(self):
+    amount = 0
+    for stock in self.stocks.all():
+      amount += stock.total
+    return amount
+
   def out_of_stock(self):
-    return self.stock <= 0
+    return self.stock() <= 0
 
   def __str__(self):
     return self.name
@@ -64,3 +70,11 @@ class Price(models.Model):
 
   def __str__(self):
     return str(self.product) + " " + "$ " + str(self.total)
+
+class Stock(models.Model):
+  product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="stocks")
+  value = models.ManyToManyField(Value, blank=True)
+  total = models.IntegerField()
+
+  def __str__(self):
+    return str(self.product) + " " + str(self.total) + " unit"
