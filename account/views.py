@@ -1,4 +1,8 @@
 
+from msilib.schema import Error
+from multiprocessing import context
+from re import A
+from urllib import request
 from django.core.mail import EmailMessage
 from django.shortcuts import redirect, render, reverse
 from django.template.loader import render_to_string
@@ -9,9 +13,10 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.sites.shortcuts import get_current_site
 import requests
-from .forms import AccountForm
-from .models import Account
+from .forms import AccountForm, UserProfileForm, UserForm
+from .models import Account, Profile
 from cart.models import CartItem, Cart
+from order.models import Order
 from functions import get_cart
 from marchi.settings import EMAIL_HOST_USER
 import random
@@ -19,8 +24,6 @@ import random
 
 
 def accounts(request):
-  request.user.is_authenticated = request.user.is_authenticateds(request)
-
   if request.user.is_authenticated:
     return redirect(reverse('dashboard'))
   else:
@@ -141,7 +144,12 @@ def log_out(request):
 
 @login_required(login_url = 'log-in')
 def dashboard(request):
-  return render(request, 'account/dashboard.html')
+  orders = Order.objects.filter(user=request.user, is_ordered=True).order_by('-created_at')
+  context = {
+    "orders" : orders,
+    "profile_picture" : Profile.objects.get(user=request.user).profile_picture.url,
+  }
+  return render(request, 'account/dashboard.html', context)
 
 def activate(request, uidb64, token):
   try:
@@ -224,3 +232,83 @@ def reset_password(request):
       uid = request.session.get("uid")
       messages.success(request, "password has been updated successfully")
       return redirect(reverse("log-in"))
+
+@login_required(login_url = 'log-in')
+def my_orders(request):
+  orders = Order.objects.filter(user=request.user, is_ordered=True).order_by("-created_at")
+  context={
+    "orders" : orders
+  }
+  return render(request, "account/my_orders.html", context)
+
+@login_required(login_url = 'log-in')
+def single_order(request, order_number):
+  order = Order.objects.get(order_number=order_number)
+  context = {
+    "order" : order,
+  }
+  return render(request, "account/single_order.html", context)
+
+@login_required(login_url = 'log-in')
+def profile(request):
+  if request.method == "POST":
+    try :
+      profile = Profile.objects.get(user=request.user)
+    except Profile.DoesNotExist:
+      profile = Profile()
+      profile.user = request.user
+      profile.save()
+
+    user_profile_form = UserProfileForm(request.POST, request.FILES, instance=profile)
+    user_form = UserForm(request.POST, instance=request.user)
+    if user_form.is_valid() and user_profile_form.is_valid():
+      user_form.save()
+      user_profile_form.save()
+      messages.success(request, 'Your information has been updated')
+      return redirect('profile')
+    else:
+      pass
+    context = {
+      "user_form" : user_form,
+      "user_profile_form" : user_profile_form,
+    }
+    
+  else:
+    user_form = UserForm(instance = request.user)
+    try :
+      user_profile_form = UserProfileForm(instance = Profile.objects.get(user =request.user))
+    except:
+      user_profile_form = UserProfileForm()
+    context = {
+      "user_form" : user_form,
+      "user_profile_form" : user_profile_form ,
+    }
+    try:
+      profile = Profile.objects.get(user=request.user)
+      context["profile"] = profile
+    except:
+      pass
+
+  return render(request, "account/profile.html", context)
+
+@login_required(login_url = 'log-in')
+def change_password(request):
+  if request.method == "POST" :
+    current_password = request.POST.get("current_password")
+    new_password = request.POST.get("new_password")
+    confirm_new_password = request.POST.get("confirm_new_password")
+    if request.user.check_password(current_password):
+      if new_password == confirm_new_password :
+        messages.success(request, 'Password was updated successfully')
+        request.user.set_password(new_password)
+        request.user.save()
+        return redirect("log-in")
+      else :
+        messages.error(request, 'New password and its confirmation does not match')
+        return redirect("change_password")
+    else :
+          messages.error(request, 'Wrong password')
+          return redirect("change_password")
+        
+
+  return render(request, "account/change_password.html")

@@ -77,6 +77,9 @@ class Account(AbstractBaseUser): #this class creates users
   # the user manager class that will use this base user class
   objects = MyAccountManager()
 
+  def full_name(self):
+    return self.first_name.capitalize() + " " + self.last_name.capitalize()
+
   def __str__(self):
     return self.email
   
@@ -87,34 +90,27 @@ class Account(AbstractBaseUser): #this class creates users
     return True
 
 
-# class ProfilePicture(models.Model):
-#   user = models.OneToOneField(Account, on_delete=models.CASCADE, related_name="picture")
-#   picture = models.ImageField(upload_to="photos/profile_pictures")
-
-#   def get_100px_image_url(self):
-#     image = Image.open(self.picture.path)
-#     path_list = self.picture.url.split('/')
-#     path=""
-#     for item in path_list:
-#       if item == "profile_pictures":
-#         item = item + "100px"
-#       path = path + "/" + item
-#     path = path[2:]
-#     return path
+class Profile(models.Model):
   
-#   def __init__(self, *args, **kwargs):
-#     super().__init__(*args, **kwargs)
-#     if self.picture:
-#       image = Image.open(self.picture.path)
-#       h = float(image.height)
-#       w = float(image.width)
-#       r = w/h
-#       new_image = image.resize((100, int(100.0/r)))
-#       path = self.get_100px_image_url()
-#       try:
-#         new_image.save(path)
-#       except FileNotFoundError:
-#         os.mkdir("media\photos\profile_pictures100px")
-#         new_image.save(path)
+  countries_list = ['Afghanistan', 'Aland Islands', 'Albania', 'Algeria', 'American Samoa', 'Andorra', 'Angola', 'Anguilla', 'Antarctica', 'Antigua and Barbuda', 'Argentina', 'Armenia', 'Aruba', 'Australia', 'Austria', 'Azerbaijan', 'Bahamas', 'Bahrain', 'Bangladesh', 'Barbados', 'Belarus', 'Belgium', 'Belize', 'Benin', 'Bermuda', 'Bhutan', 'Bolivia, Plurinational State of', 'Bonaire, Sint Eustatius and Saba', 'Bosnia and Herzegovina', 'Botswana', 'Bouvet Island', 'Brazil', 'British Indian Ocean Territory', 'Brunei Darussalam', 'Bulgaria', 'Burkina Faso', 'Burundi', 'Cambodia', 'Cameroon', 'Canada', 'Cape Verde', 'Cayman Islands', 'Central African Republic', 'Chad', 'Chile', 'China', 'Christmas Island', 'Cocos (Keeling) Islands', 'Colombia', 'Comoros', 'Congo', 'Congo, The Democratic Republic of the', 'Cook Islands', 'Costa Rica', "Côte d'Ivoire", 'Croatia', 'Cuba', 'Curaçao', 'Cyprus', 'Czech Republic', 'Denmark', 'Djibouti', 'Dominica', 'Dominican Republic', 'Ecuador', 'Egypt', 'El Salvador', 'Equatorial Guinea', 'Eritrea', 'Estonia', 'Ethiopia', 'Falkland Islands (Malvinas)', 'Faroe Islands', 'Fiji', 'Finland', 'France', 'French Guiana', 'French Polynesia', 'French Southern Territories', 'Gabon', 'Gambia', 'Georgia', 'Germany', 'Ghana', 'Gibraltar', 'Greece', 'Greenland', 'Grenada', 'Guadeloupe', 'Guam', 'Guatemala', 'Guernsey', 'Guinea', 'Guinea-Bissau', 'Guyana', 'Haiti', 'Heard Island and McDonald Islands', 'Holy See (Vatican City State)', 'Honduras', 'Hong Kong', 'Hungary', 'Iceland', 'India', 'Indonesia', 'Iran, Islamic Republic of', 'Iraq', 'Ireland', 'Isle of Man', 'Israel', 'Italy', 'Jamaica', 'Japan', 'Jersey', 'Jordan', 'Kazakhstan', 'Kenya', 'Kiribati', "Korea, Democratic People's Republic of", 'Korea, Republic of', 'Kuwait', 'Kyrgyzstan', "Lao People's Democratic Republic", 'Latvia', 'Lebanon', 'Lesotho', 'Liberia', 'Libya', 'Liechtenstein', 'Lithuania', 'Luxembourg', 'Macao', 'Macedonia, Republic of', 'Madagascar', 'Malawi', 'Malaysia', 'Maldives', 'Mali', 'Malta', 'Marshall Islands', 'Martinique', 'Mauritania', 'Mauritius', 'Mayotte', 'Mexico', 'Micronesia, Federated States of', 'Moldova, Republic of', 'Monaco', 'Mongolia', 'Montenegro', 'Montserrat', 'Morocco', 'Mozambique', 'Myanmar', 'Namibia', 'Nauru', 'Nepal', 'Netherlands', 'New Caledonia', 'New Zealand', 'Nicaragua', 'Niger', 'Nigeria', 'Niue', 'Norfolk Island', 'Northern Mariana Islands', 'Norway', 'Oman', 'Pakistan', 'Palau', 'Palestinian Territory, Occupied', 'Panama', 'Papua New Guinea', 'Paraguay', 'Peru', 'Philippines', 'Pitcairn', 'Poland', 'Portugal', 'Puerto Rico', 'Qatar', 'Réunion', 'Romania', 'Russian Federation', 'Rwanda', 'Saint Barthélemy', 'Saint Helena, Ascension and Tristan da Cunha', 'Saint Kitts and Nevis', 'Saint Lucia', 'Saint Martin (French part)', 'Saint Pierre and Miquelon', 'Saint Vincent and the Grenadines', 'Samoa', 'San Marino', 'Sao Tome and Principe', 'Saudi Arabia', 'Senegal', 'Serbia', 'Seychelles', 'Sierra Leone', 'Singapore', 'Sint Maarten (Dutch part)', 'Slovakia', 'Slovenia', 'Solomon Islands', 'Somalia', 'South Africa', 'South Georgia and the South Sandwich Islands', 'Spain', 'Sri Lanka', 'Sudan', 'Suriname', 'South Sudan', 'Svalbard and Jan Mayen', 'Swaziland', 'Sweden', 'Switzerland', 'Syrian Arab Republic', 'Taiwan, Province of China', 'Tajikistan', 'Tanzania, United Republic of', 'Thailand', 'Timor-Leste', 'Togo', 'Tokelau', 'Tonga', 'Trinidad and Tobago', 'Tunisia', 'Turkey', 'Turkmenistan', 'Turks and Caicos Islands', 'Tuvalu', 'Uganda', 'Ukraine', 'United Arab Emirates', 'United Kingdom', 'United States', 'United States Minor Outlying Islands', 'Uruguay', 'Uzbekistan', 'Vanuatu', 'Venezuela, Bolivarian Republic of', 'Viet Nam', 'Virgin Islands, British', 'Virgin Islands, U.S.', 'Wallis and Futuna', 'Yemen', 'Zambia', 'Zimbabwe']
+  countries = []
+  for country in countries_list:
+    countries.append([country, country])
+  user = models.OneToOneField(Account, on_delete=models.CASCADE)
+  address_line_1 = models.CharField(max_length=100, null=True, blank=True)
+  address_line_2 = models.CharField(max_length=100, null=True, blank=True)
+  profile_picture = models.ImageField(blank=True, null=True, upload_to='userprofile/')
+  country = models.CharField(max_length=50, choices=countries, null=True, blank=True)
+  state = models.CharField(max_length=50, null=True, blank=True)
+  city = models.CharField(max_length=50, null=True, blank=True)
+  zip_code = models.CharField(max_length=10, null=True, blank=True)
 
-  
+
+  def __str__(self):
+    return self.user.full_name()
+
+  def full_name(self):
+    return self.user.full_name()
+
+  def full_address(self):
+    return str(self.address_line_1).capitalize() + ", " + str(self.address_line_2)

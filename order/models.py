@@ -64,8 +64,11 @@ class Order(models.Model):
   def taxed_total(self):
     return round(self.order_total+self.tax, 2)
 
+  def full_address(self):
+    return str(self.address_line_1).capitalize() + ", " + str(self.address_line_2)
+    
 class OrderProduct (models.Model):
-  order = models.ForeignKey(Order, on_delete=models.CASCADE) 
+  order = models.ForeignKey(Order, on_delete=models.CASCADE,) 
   payment = models.ForeignKey(Payment, on_delete=models. SET_NULL, blank=True, null=True) 
   user = models. ForeignKey(Account, on_delete=models.CASCADE, blank=True, null=True) 
   product = models.ForeignKey(Product, on_delete=models.CASCADE) 

@@ -1,10 +1,11 @@
-from distutils.command.upload import upload
-from itertools import product
+import shutil
 from queue import Empty
 from django.db import models
 from django.shortcuts import reverse
 from pkg_resources import require
 from category.models import Category
+from account.models import Account
+from django.db.models import Avg
 
 # Create your models here.
 
@@ -14,7 +15,6 @@ class Product(models.Model):
   description = models.TextField(max_length=300, blank=True)
   off_price = models.FloatField(default=0.0)
   price = models.FloatField(default=0.0)
-  has_variant = models.BooleanField(default=False)
   image = models.ImageField(upload_to='photos/products')
   is_available = models.BooleanField(default=True)
   category = models.ForeignKey(Category, on_delete=models.CASCADE)
@@ -38,6 +38,7 @@ class Product(models.Model):
     return self.name
 
   def price_from_variants(self):
+    # returns the price that should be displayed on the product page
     values = set()
     for variation in self.variations.all():
       values.add(variation.values.all()[0])
@@ -46,6 +47,19 @@ class Product(models.Model):
       if values == set(price.value.all()):
           price = price.total
           return price
+
+  def average_rating(self):
+    ratings = ReviewRating.objects.filter(product=self, status=True)
+    number_of_rates = ratings.count()
+    avg = ratings.aggregate(Avg('rating'))
+    if avg['rating__avg']:
+      return round(float(avg['rating__avg']), 1)
+    else:
+      return 0.0
+  
+  def number_of_ratings(self):
+    ratings = ReviewRating.objects.filter(product=self, status=True)
+    return ratings.count()
 
 class Variation(models.Model):
   product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="variations", null=True)
@@ -78,3 +92,28 @@ class Stock(models.Model):
 
   def __str__(self):
     return str(self.product) + " " + str(self.total) + " unit"
+
+class ReviewRating(models.Model):
+  product = models.ForeignKey(Product, on_delete=models.CASCADE)
+  user = models.ForeignKey(Account, on_delete=models.CASCADE)
+  subject = models.CharField(max_length=100, blank=True)
+  review = models.TextField(max_length=500, blank=True)
+  rating = models.IntegerField()
+  ip = models.CharField(max_length=20, blank=True)
+  status = models.BooleanField(default=True)
+  created_at = models.DateField(auto_now_add=True)
+  updated_at = models.DateField(auto_now=True)
+
+  def __str__(self):
+    return self.subject
+
+class Gallery(models.Model):
+  product = models.ForeignKey(Product, on_delete=models.CASCADE)
+  image = models.ImageField(upload_to = "stores/products/", max_length=255)
+
+  class Meta:
+    verbose_name_plural = "galleries"
+  
+  def __str__(self):
+    return self.product.name
+  

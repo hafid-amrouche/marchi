@@ -1,5 +1,7 @@
 from django import forms
-from .models import Account
+from django.http import HttpRequest
+from .models import Account, Profile 
+
 
 class AccountForm(forms.ModelForm):
   attrs = {
@@ -38,3 +40,34 @@ class AccountForm(forms.ModelForm):
         self.add_error("confirm_password", "")
         self.add_error("password", "Passwords do not match.")
     return cleaned_data
+
+class UserForm(forms.ModelForm):
+  class Meta:
+    model = Account
+    fields = ["first_name", "last_name", "phone_number", "email"]
+  
+  def __init__(self,  *args, **kwargs):
+    super(UserForm, self).__init__(*args, **kwargs)
+    for field in self.fields.values():
+      field.widget.attrs['class'] = "form-control"
+
+    
+class UserProfileForm(forms.ModelForm):   
+  profile_picture = forms.ImageField(required=False, widget=forms.FileInput, error_messages={
+    "invalid":("Image files only")
+  })   
+
+  class Meta:
+    model = Profile
+    fields = ["profile_picture", "address_line_1", "address_line_2", "country", "state", "city", "zip_code"]
+
+  def __init__(self, *args, **kwargs):
+    super(UserProfileForm, self).__init__(*args, **kwargs)
+    for field in self.fields.values():
+      field.required = False
+      if field == self.fields["country"] :
+        field.widget.attrs['class'] = "form-select"
+        field.widget.attrs['aria-label'] = "Default select example"
+        continue
+      field.widget.attrs['class'] = "form-control"
+

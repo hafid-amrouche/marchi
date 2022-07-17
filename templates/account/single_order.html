@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+
+<!-- ========================= SECTION CONTENT ========================= -->
+<section class="section-conten padding-y bg">
+  <div class="container">
+    <div class="row">
+      {% include 'includes/dashboard_sidebar.html' %}
+      <main class="col-md-9">
+        <article class="card">
+          <div class="card-body">
+            <table class="table table-borderless">
+              <tbody>
+                <tr>
+                  <th scope="row">Order Number</th>
+                  <td>{{ order.order_number }}</td>
+                </tr>
+                <tr>
+                  <th scope="row">Total</th>
+                  <td>$ {{ order.taxed_total }}</td>
+                </tr>
+                <tr>
+                  <th scope="row">Full Name</th>
+                  <td>{{ order.full_name }}</td>
+                </tr>
+                <tr>
+                  <th scope="row">Email</th>
+                  <td>{{ order.email }}</td>
+                </tr>
+                <tr>
+                  <th scope="row">Phone Number</th>
+                  <td>{{ order.phone }}</td>
+                </tr>
+                <tr>
+                  <th scope="row">Address</th>
+                  <td>{{ order.full_address }}</td>
+                </tr>
+                <tr>
+                  <th scope="row">Order Date</th>
+                  <td>{{ order.created_at }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <table class="table table-borderless table-shopping-cart">
+            <thead class="text-muted">
+              <tr class="small text-uppercase">
+                <th scope="col">Product</th>
+                <th scope="col" width="120">Quantity</th>
+                <th scope="col" width="120">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in order.orderproduct_set.all %}
+                <tr>
+                  <td>
+                    <figure class="itemside align-items-center">
+                      <div class="aside"><img src="{{ item.product.image.url }}" class="img-sm"></div>
+                      <figcaption class="info">
+                        <a href="{{ item.product.get_url }}" class="title text-dark">{{ item.product.name }}</a>
+                        {% for value  in item.value.all %}
+                          <p class="text-muted small">{{ value.variation.category|capfirst }}: {{ value.name|capfirst }}</p>
+                        {% endfor %}
+                      </figcaption>
+                    </figure>
+                  </td>
+                  <td> 
+                    <!-- col.// -->
+                    <div class="col"> 
+                      <div class="input-group input-spinner">
+                        <input type="text" class="form-control"  value="{{ item.quantity }}">
+                      </div> <!-- input-group.// -->
+                    </div> <!-- col.// -->
+                  </td>
+                  <td> 
+                    <div class="price-wrap"> 
+                      <var class="price">$ {{ item.price_in_float }}</var> 
+                    </div> <!-- price-wrap .// -->
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </article> <!-- order-group.// --> 
+      </main>
+    </div> <!-- row.// -->
+  </div>
+  
+  
+</section>
+<!-- ========================= SECTION CONTENT END// ========================= -->
+
+
+{% endblock content %}
+
+
+
+
+
+<div class="col-lg-6">
+  <div class="card">
+    <div class="card-body">
+      
+    </div>
+  </div>
+</div>

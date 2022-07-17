@@ -1,13 +1,11 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load store_templates %}
 
 {% block title %}
   {{ product.name.capitalize }}
 {% endblock title %}
 
-{% block link %}
-  <link rel="stylesheet" href="{% static 'css/mine.css' %}">
-{% endblock link %}
 
 
 {% block content %}
@@ -19,21 +17,99 @@
       <div class="row no-gutters">
         <aside class="col-md-6">
           <article class="gallery-wrap"> 
-            <div class="img-big-wrap">
-              <a href="{{ product.get_url }}"><img src="{{ product.image.url }}"></a>
+            <div class="img-big-wrap mainImage">
+              <center><img src="{{ product.image.url }}"></center>
             </div> <!-- img-big-wrap.// -->
             
           </article> <!-- gallery-wrap .end// -->
+          <ul class="thumb">
+            <li>
+              <a href="{{ product.image.url }}"><img src="{{product.image.url}}" alt="" target="mainImage"></a>
+              {% for gallery in product.gallery_set.all %}
+                <a href="{{ gallery.image.url }}"><img src="{{ gallery.image.url }}" alt="" target="mainImage"></a>
+              {% endfor %}
+          </li>
+          </ul>
         </aside>
         <main class="col-md-6 border-left">
           <article class="content-body">
             <form action="{% url 'add_to_cart' 'add' product.pk %}" method="POST">
               {% csrf_token %}
               <h2 class="title">{{ product.name.capitalize }}</h2>
-              
+              <div style="margin-top:-5px; margin-bottom:10px">
+                <span style="color:#b4690b;font-weight:700;font-size:17px;">{{ product.average_rating }} </span>
+                {% if product.average_rating > 4.5 %}
+                  <i class="fa fa-star" style=" color:orange"></i>
+                  <i class="fa fa-star" style=" color:orange"></i>
+                  <i class="fa fa-star" style=" color:orange"></i>
+                  <i class="fa fa-star" style=" color:orange"></i>
+                  <i class="fa fa-star" style=" color:orange"></i>
+                {% elif product.average_rating > 4 %}
+                  <i class="fa fa-star" style=" color:orange"></i>
+                  <i class="fa fa-star" style=" color:orange"></i>
+                  <i class="fa fa-star" style=" color:orange"></i>
+                  <i class="fa fa-star" style=" color:orange"></i>
+                  <i class="fa fa-star-half-full" style=" color:orange"></i>
+                {% elif product.average_rating > 3.5 %}
+                  <i class="fa fa-star" style=" color:orange"></i>
+                  <i class="fa fa-star" style=" color:orange"></i>
+                  <i class="fa fa-star" style=" color:orange"></i>
+                  <i class="fa fa-star" style=" color:orange"></i>
+                  <i class="fa fa-star-o"></i>
+                {% elif product.average_rating > 3 %}
+                  <i class="fa fa-star" style=" color:orange"></i>
+                  <i class="fa fa-star" style=" color:orange"></i>
+                  <i class="fa fa-star" style=" color:orange"></i>
+                  <i class="fa fa-star-half-full" style=" color:orange"></i>
+                  <i class="fa fa-star-o"></i>
+                {% elif product.average_rating > 2.5 %}
+                  <i class="fa fa-star" style=" color:orange"></i>
+                  <i class="fa fa-star" style=" color:orange"></i>
+                  <i class="fa fa-star" style=" color:orange"></i>
+                  <i class="fa fa-star-o"></i>
+                  <i class="fa fa-star-o"></i>
+                {% elif product.average_rating > 2 %}
+                  <i class="fa fa-star" style=" color:orange"></i>
+                  <i class="fa fa-star" style=" color:orange"></i>
+                  <i class="fa fa-star-half-full" style=" color:orange"></i>
+                  <i class="fa fa-star-o"></i>
+                  <i class="fa fa-star-o"></i>
+                {% elif product.average_rating > 1.5 %}
+                  <i class="fa fa-star" style=" color:orange"></i>
+                  <i class="fa fa-star" style=" color:orange"></i>
+                  <i class="fa fa-star-o"></i>
+                  <i class="fa fa-star-o"></i>
+                  <i class="fa fa-star-o"></i>
+                {% elif product.average_rating > 1 %}
+                  <i class="fa fa-star" style=" color:orange"></i>
+                  <i class="fa fa-star-half-full" style=" color:orange"></i>
+                  <i class="fa fa-star-o"></i>
+                  <i class="fa fa-star-o"></i>
+                  <i class="fa fa-star-o"></i>
+                {% elif product.average_rating > 0.5 %}
+                  <i class="fa fa-star" style=" color:orange"></i>
+                  <i class="fa fa-star-o"></i>
+                  <i class="fa fa-star-o"></i>
+                  <i class="fa fa-star-o"></i>
+                  <i class="fa fa-star-o"></i>
+                {% elif product.average_rating > 0 %}
+                  <i class="fa fa-star-half-full" style=" color:orange"></i>
+                  <i class="fa fa-star-o"></i>
+                  <i class="fa fa-star-o"></i>
+                  <i class="fa fa-star-o"></i>
+                  <i class="fa fa-star-o"></i>
+                {% elif product.average_rating <= 0 %}
+                  <i class="fa fa-star-o"></i>
+                  <i class="fa fa-star-o"></i>
+                  <i class="fa fa-star-o"></i>
+                  <i class="fa fa-star-o"></i>
+                  <i class="fa fa-star-o"></i>
+                {% endif %}
+                <span style="color: #6a6f73;"> ({{ product.number_of_ratings }})</span>
+              </div>
               <div class="mb-3"> 
                 <var class="price h4">$ 
-                  {% if product.has_variant %}
+                  {% if product.variants.all %}
                     {{ product.price_from_variants }}
                   {% else %}
                     {{ product.price }}
@@ -41,7 +117,7 @@
                   </var> 
               </div> 
               
-              <p>{{ product.discription }}</p>
+              <p>{{ product.description }}</p>
               {% if product.variations.all %} 
                 <hr>
                 {% for variation in product.variations.all %}
@@ -71,21 +147,19 @@
                   </div> <!-- row.// -->
                 {% endfor %}
               {% endif %}
-              <div class="row">
-                <p>{{ product.stock }} left</p>  
-              </div   
-              <hr>
+              <hr> 
               {% if product.out_of_stock == False %}
                 <form action="{% url 'add_to_cart' 'add' product.id %}" method="POST">
                   {% csrf_token %}
                   {% for value in item.value.all %}
                     <input type="hidden" name="{{ value.variation.category }}" value="{{ value.name }}">
                   {% endfor %}
-                  <button class="btn btn-primary" id="id="button-plus"">
+                  <button class="btn btn-primary" id="button-plus">
                     <span class="text">
                       Add To Cart
                     </span>
                   </button>
+                  <span style="color:#999;">{{ product.stock }} pieces left</span>
                 </form>
               {% else %}
                 <h5 style="text-align:center">Out Of Stock</h5>
@@ -98,33 +172,87 @@
     <!-- ============================ COMPONENT 1 END .// ================================= -->
     
     <br>
+
+    <div class="row">
+      <div class="col-md-9">
+        <form action="{% url 'submit_review' product.id %}" method="POST">
+          {% csrf_token %}
+          <h5>Make Review</h5>
+          <div style="display:grid">
+            <!-- here you add a 5 stars icons -->
+            <div class="rate">
+              <input type="radio" id="star5" name="rate" value="5" required>
+              <label for="star5" title="text">5 stars</label>
+              <input type="radio" id="star4" name="rate" value="4">
+              <label for="star4" title="text">4 stars</label>
+              <input type="radio" id="star3" name="rate" value="3">
+              <label for="star3" title="text">3 stars</label>
+              <input type="radio" id="star2" name="rate" value="2">
+              <label for="star2" title="text">2 stars</label>
+              <input type="radio" id="star1" name="rate" value="1">
+              <label for="star1" title="text">1 star</label>
+            </div>
+            <div>
+              <label for="subject"> Title:</label>
+              <input type="text" class="form-control" name="subject" id="subject">
+              <br>
+              <label for="review">Review:</label>
+              <textarea class="form-control" rows="4" name="review" id="review"></textarea>
+              <br>
+              {% if user.is_authenticated %}
+                {% if has_ordered_product %}
+                  {% if review_exists %}
+                    <input type="submit" value="Update Review" class="btn btn-primary">
+                  {% else %}
+                    <input type="submit" value="Post Review" class="btn btn-primary">
+                  {% endif %}
+                {% else %}
+                <p>You need to buy the product to post a review.</p>
+                {% endif %}
+              {% else %}
+                <p>Sign-in to post a review. <span><a href="{% url 'log-in' %}">sign-in</a></span></p>
+              {% endif %}
+              <br>
+            </div>
+          </div>
+  
+        </form>
+      </div>
+    </div>
     
     <div class="row">
           <div class="col-md-9">
     
       <header class="section-heading">
-        <h3>Customer Reviews </h3>  
+        <h3>Customer Reviews ({{ product.number_of_ratings }})</h3>  
         
       </header>
-    
-      <article class="box mb-3">
-        <div class="icontext w-100">
-          <img src="./images/avatars/avatar1.jpg" class="img-xs icon rounded-circle">
-          <div class="text">
-            <span class="date text-muted float-md-right">24.04.2020 </span>  
-            <h6 class="mb-1">Mike John </h6>
-            
+      {% for review in reviews %}
+        <article class="box mb-3">
+            <div class="icontext w-100">
+              <img src="https://www.w3schools.com/howto/img_avatar.png" alt="{{ user.first_name|capfirst }} Profile Picture" height=50px width:50px style="border-radius:50%; margin-right:10px;">
+              <div class="text">
+                <span class="date text-muted float-md-right">{{ review.updated_at|date:"D, M, Y" }} </span>
+                <h6 class="mb-1">{{ review.user.first_name|capfirst }} {{ review.user.last_name|capfirst }} </h6>
+                <h6 class="mb-1">
+                  {% for i in 1|range:6 %}
+                    {% if i <= review.rating %}
+                      <span class="fa fa-star checked"></span>
+                    {% else %}
+                      <span class="fa fa-star"></span>                    
+                    {% endif %}
+                  {% endfor %}
+                </h6>
+              </div>
           </div>
-        </div> <!-- icontext.// -->
-        <div class="mt-3">
-          <p>
-            Dummy comment Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-            tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-            quis nostrud exercitation ullamco laboris nisi ut aliquip
-          </p>	
-        </div>
-      </article>
-    
+          <div class="mt-3">
+            <h6>{{ review.subject }}</h4>	
+          </div>
+          <div class="mt-3">
+            <p>{{ review.review }}</p>	
+          </div>
+        </article>
+      {% endfor %}
       
     
       </div> <!-- col.// -->
@@ -133,6 +261,21 @@
     
     </div> <!-- container .//  -->
   </section>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	<script>
+		$(document).ready(function(){
+			$('.thumb a').click(
+				function(e){
+					/* when clicking on the anchor dafault behavor of going to the link will not happen*/
+					e.preventDefault();
+					/* insted the "src" of the main image will be equal to the "href" of the clicked image */
+					$('.mainImage img').attr('src', $(this).attr("href")); 
+				}
+			)
+		})
+</script>
+
 {% endblock content %}
 
 

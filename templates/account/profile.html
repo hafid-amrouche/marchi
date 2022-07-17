@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block link %}<link rel="stylesheet" href="{% static 'css/account/profile.css' %}">{% endblock link %}
+
+{% block content %}
+
+
+
+<!-- ========================= SECTION CONTENT ========================= -->
+  <section class="section-conten padding-y bg">
+   
+  
+    {% include 'includes/alerts.html' %}
+    <div class="container">
+      <div class="row">
+        {% include 'includes/dashboard_sidebar.html' %}
+        <main class="col-md-9">
+          <article class="card">
+            <header class="card-header">
+              <strong class="d-inline-block mr-3" style="font-size:20px">Profile</strong>
+            </header>
+            <div class="card-body">
+              <div class="row" style="margin-bottom:15px;">
+                {% if profile.profile_picture %}
+                    <div>
+                      <img src="{{ profile.profile_picture.url }}" alt="Profile picture" width="100" style="border-radius:50%">
+                    </div>
+                  {% endif %}
+              </div>
+              <div class="row">
+                <div class="col-md-12">
+                  <form action="" method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="form-group row">
+                      <label for="first_name" class="col-sm-2 col-form-label">First Name :</label>
+                      <div class=col-md-4>
+                        {{ user_form.first_name }}
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label for="last_name" class="col-sm-2 col-form-label">Last Name :</label>
+                      <div class=col-md-4>
+                        {{ user_form.last_name }}
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label for="phone_number" class="col-sm-2 col-form-label">Phone Number :</label>
+                      <div class=col-md-4>
+                        {{ user_form.phone_number }}
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label for="email" class="col-sm-2 col-form-label">Email :</label>
+                      <div class=col-md-4>
+                        {{ user_form.email }}
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label for="profile_picture" class="col-sm-2 col-form-label">Profile Picture :</label>
+                      <div class=col-md-4>
+                        {{ user_profile_form.profile_picture }}
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label for="address_line_1" class="col-sm-2 col-form-label">Address Line 1 :</label>
+                      <div class=col-md-4>
+                        {{ user_profile_form.address_line_1 }}
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label for="address_line_1" class="col-sm-2 col-form-label">Address Line 2 :</label>
+                      <div class=col-md-4>
+                        {{ user_profile_form.address_line_2 }}
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label for="country" class="col-sm-2 col-form-label">Country :</label>
+                      <div class="col-sm-4">
+                        {{ user_profile_form.country }}
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label for="state" class="col-sm-2 col-form-label">State :</label>
+                      <div class=col-md-4>
+                        {{ user_profile_form.state }}
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      
+                      <label for="city" class="col-sm-2 col-form-label">City :</label>
+                      <div class=col-md-4>
+                        {{ user_profile_form.city }}
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label for="zip_code" class="col-sm-2 col-form-label">Zip Code :</label>
+                      <div class="col-sm-4">
+                        {{ user_profile_form.zip_code }}
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <div class="col-md-10">
+                        <button type="submit" class="btn btn-primary" style="min-width:100px">Save</button>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div> <!-- card-body .// -->
+          </article> <!-- order-group.// --> 
+        </main>
+      </div> <!-- row.// -->
+    </div>
+    
+    
+  </section>
+  <!-- ========================= SECTION CONTENT END// ========================= -->
+
+  
+{% endblock content %}

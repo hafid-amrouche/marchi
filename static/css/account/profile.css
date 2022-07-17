@@ -1,0 +1,13 @@
+.card-body .form-control::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+  color: #555659;
+  opacity: 0.5; /* Firefox */
+  font-weight: bold;
+}
+
+.card-body .form-control :-ms-input-placeholder { /* Internet Explorer 10-11 */
+        color: #555659;
+}
+
+.card-body .form-control::-ms-input-placeholder { /* Microsoft Edge */
+        color: #555659;
+}
