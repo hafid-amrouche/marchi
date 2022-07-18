@@ -27,7 +27,7 @@ class CartItem(models.Model):
     return str(self.product)
 
   def price(self):
-    if self.product.has_variant :
+    if self.product.variations.all() :
       values = []
       for value in self.value.all():
         values.append(value)

@@ -141,7 +141,7 @@
                 <a href="{{ product.get_url }}" class="title">{{ product.name }}</a>
                 <div class="price-wrap mt-2">
                     <span class="price">$ 
-                      {% if product.has_variant %}
+                      {% if product.variations.all %}
                         {{ product.price_from_variants }}
                       {% else %}
                         {{ product.price }}

@@ -159,7 +159,9 @@
                       Add To Cart
                     </span>
                   </button>
-                  <span style="color:#999;">{{ product.stock }} pieces left</span>
+                  {% if not product.variations.all %}
+                    <span style="color:#999;">{{ product.stock }} pieces left</span>
+                  {% endif %}
                 </form>
               {% else %}
                 <h5 style="text-align:center">Out Of Stock</h5>
